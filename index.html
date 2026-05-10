@@ -73,15 +73,13 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--tx);min-h
 .stycard.sel::after{content:'✓';position:absolute;top:8px;right:10px;font-size:12px;font-weight:800;color:var(--P);}
 
 /* ── STYLE PREVIEW BADGE ── */
-.sty-preview{height:56px;border-radius:10px;margin-bottom:.6rem;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;letter-spacing:.5px;overflow:hidden;position:relative;}
-.prev-pf{background:linear-gradient(135deg,#7c4a0a,#d4781a);color:#fde8b0;}
-.prev-cp{background:linear-gradient(135deg,#1a1a00,#f5a800);color:#fff700;}
-.prev-cu{background:linear-gradient(135deg,#ffe8f0,#d4eeff);color:#c44569;}
-.prev-rh{background:linear-gradient(135deg,#2c1a0a,#6b3a1f);color:#e8c88a;}
-.prev-us{background:linear-gradient(135deg,#0d0d0d,#2a2a2a);color:#e0e0e0;}
-.prev-dl{background:linear-gradient(135deg,#000,#1a1a1a);color:#d4af37;}
-.prev-df{background:linear-gradient(135deg,#0d0000,#3d0000);color:#ff6b2b;}
-.prev-me{background:linear-gradient(135deg,#0f0f14,#1c1c2e);color:#ddd5c0;font-style:normal;letter-spacing:2px;}
+.sty-preview{height:110px;border-radius:10px;margin-bottom:.6rem;overflow:hidden;position:relative;background:#1e1a2e;}
+.sty-preview img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .3s ease, opacity .3s ease;opacity:0;}
+.sty-preview img.loaded{opacity:1;}
+.stycard:hover .sty-preview img{transform:scale(1.04);}
+.sty-preview::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#1e1a2e 25%,#2a2440 50%,#1e1a2e 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;z-index:0;}
+.sty-preview img.loaded~*,.sty-preview:has(img.loaded)::before{animation:none;background:none;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 
 .sc-name{font-size:13px;font-weight:800;color:var(--tx);margin-bottom:3px;}
 .sc-desc{font-size:11px;color:var(--mu);line-height:1.4;}
@@ -235,56 +233,56 @@ footer span{color:var(--P);font-weight:700;}
   <div class="sty-grid">
 
     <div class="stycard" onclick="pickSty(this,'playful_food')">
-      <div class="sty-preview prev-pf">🍞 3D COOKIE</div>
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/7c/c8/0nJrMb9P_t.png" alt="Playful Food" loading="lazy" decoding="async" width="280" height="110"></div>
       <div class="sc-name">Playful Food</div>
       <div class="sc-desc">Font 3D dari bahan makanan, warna hangat, karakter imut.</div>
       <div class="sc-tags"><span class="stag">3D Font</span><span class="stag">Warm</span><span class="stag">Mascot</span></div>
     </div>
 
-    <div class="stycard" onclick="pickSty(this,'comic_pop')">
-      <div class="sty-preview prev-cp">💥 COMIC BOLD</div>
-      <div class="sc-name">Comic Pop Art</div>
-      <div class="sc-desc">Ledakan halftone, bold kuning-hitam, energi komik manga.</div>
-      <div class="sc-tags"><span class="stag">Halftone</span><span class="stag">Bold</span><span class="stag">Pop</span></div>
-    </div>
-
     <div class="stycard" onclick="pickSty(this,'cute_pastel')">
-      <div class="sty-preview prev-cu">🌸 Bubbly Pastel</div>
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/05/f4/YcjvUkqz_t.png" alt="Cute Pastel" loading="lazy" decoding="async" width="280" height="110"></div>
       <div class="sc-name">Cute Pastel</div>
       <div class="sc-desc">Font 3D bubbly warna-warni pastel, ceria dan playful.</div>
       <div class="sc-tags"><span class="stag">Pastel</span><span class="stag">Bubbly</span><span class="stag">Soft</span></div>
     </div>
 
-    <div class="stycard" onclick="pickSty(this,'retro_heritage')">
-      <div class="sty-preview prev-rh">🏺 VINTAGE CO.</div>
-      <div class="sc-name">Retro Heritage</div>
-      <div class="sc-desc">Font rustic vintage, earthy brown, feel artisan premium.</div>
-      <div class="sc-tags"><span class="stag">Vintage</span><span class="stag">Rustic</span><span class="stag">Premium</span></div>
-    </div>
-
     <div class="stycard" onclick="pickSty(this,'urban_sketchy')">
-      <div class="sty-preview prev-us">🖊️ CHALK SKETCH</div>
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/94/3a/nvw79rlZ_t.png" alt="Urban Sketchy" loading="lazy" decoding="async" width="280" height="110"></div>
       <div class="sc-name">Urban Sketchy</div>
       <div class="sc-desc">Chalk doodle di latar gelap, hand-drawn, street credibility.</div>
       <div class="sc-tags"><span class="stag">Chalk</span><span class="stag">Dark</span><span class="stag">Urban</span></div>
     </div>
 
-    <div class="stycard" onclick="pickSty(this,'dark_luxury')">
-      <div class="sty-preview prev-dl">🥃 GOLD LUXURY</div>
-      <div class="sc-name">Dark Luxury</div>
-      <div class="sc-desc">Hitam + cipratan emas, grunge eksklusif, high-end premium.</div>
-      <div class="sc-tags"><span class="stag">Black+Gold</span><span class="stag">Grunge</span><span class="stag">Exclusive</span></div>
+    <div class="stycard" onclick="pickSty(this,'retro_heritage')">
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/e2/bc/U3CMBoPZ_t.png" alt="Retro Heritage" loading="lazy" decoding="async" width="280" height="110"></div>
+      <div class="sc-name">Retro Heritage</div>
+      <div class="sc-desc">Font rustic vintage, earthy brown, feel artisan premium.</div>
+      <div class="sc-tags"><span class="stag">Vintage</span><span class="stag">Rustic</span><span class="stag">Premium</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'comic_pop')">
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/cd/6a/foxoaOPh_t.png" alt="Comic Pop Art" loading="lazy" decoding="async" width="280" height="110"></div>
+      <div class="sc-name">Comic Pop Art</div>
+      <div class="sc-desc">Ledakan halftone, bold kuning-hitam, energi komik manga.</div>
+      <div class="sc-tags"><span class="stag">Halftone</span><span class="stag">Bold</span><span class="stag">Pop</span></div>
     </div>
 
     <div class="stycard" onclick="pickSty(this,'dark_fire')">
-      <div class="sty-preview prev-df">🔥 FIRE EPIC</div>
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/fc/18/eiGefhzv_t.png" alt="Dark Fire" loading="lazy" decoding="async" width="280" height="110"></div>
       <div class="sc-name">Dark Fire Dramatic</div>
       <div class="sc-desc">Api nyata, asap, font metalik, sinematik dan epic.</div>
       <div class="sc-tags"><span class="stag">Fire</span><span class="stag">Metallic</span><span class="stag">Epic</span></div>
     </div>
 
+    <div class="stycard" onclick="pickSty(this,'dark_luxury')">
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/79/23/nawfrBBm_t.png" alt="Dark Luxury" loading="lazy" decoding="async" width="280" height="110"></div>
+      <div class="sc-name">Dark Luxury</div>
+      <div class="sc-desc">Hitam + cipratan emas, grunge eksklusif, high-end premium.</div>
+      <div class="sc-tags"><span class="stag">Black+Gold</span><span class="stag">Grunge</span><span class="stag">Exclusive</span></div>
+    </div>
+
     <div class="stycard" onclick="pickSty(this,'modern_elegant')">
-      <div class="sty-preview prev-me">◆ MODERN ÉLITE</div>
+      <div class="sty-preview"><img src="https://thumbs2.imgbox.com/11/23/eZ8BINxg_t.png" alt="Modern Elegant" loading="lazy" decoding="async" width="280" height="110"></div>
       <div class="sc-name">Modern Elegant</div>
       <div class="sc-desc">Whitespace lega, tipografi sleek bold, sentuhan glassy, palette gelap netral + satu aksen.</div>
       <div class="sc-tags"><span class="stag">Luxury</span><span class="stag">Minimal</span><span class="stag">Editorial</span></div>
@@ -941,6 +939,12 @@ function showToast(){
   t.classList.add('on');
   setTimeout(function(){t.classList.remove('on');},2200);
 }
+
+// fade-in images after load
+document.querySelectorAll('.sty-preview img').forEach(function(img){
+  if(img.complete) img.classList.add('loaded');
+  else img.addEventListener('load',function(){img.classList.add('loaded');});
+});
 </script>
 </body>
 </html>
