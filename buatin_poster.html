@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buatin.Poster — AI Prompt Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --P:#6c2bd9;--PD:#4a1a9e;--PM:#8b47f0;--PL:#ede5ff;
+  --AC:#f59e0b;--ACL:#fef3c7;
+  --bg:#f8f7fc;--w:#fff;--gray:#f2f0f8;--bd:#e2ddf0;
+  --tx:#1a1a2e;--mu:#8b8aa8;--re:#e53e3e;
+}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(135deg,#1a0533 0%,#3d1278 50%,#6c2bd9 100%);padding:3rem 1.5rem 2.5rem;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%, rgba(139,71,240,.4) 0%, transparent 60%), radial-gradient(ellipse at 20% 80%, rgba(245,158,11,.15) 0%, transparent 50%);}
+.hero-inner{position:relative;z-index:1;}
+.app-name{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);padding:5px 16px;border-radius:30px;margin-bottom:1rem;}
+.app-dot{font-size:18px;}
+.app-label{font-size:12px;font-weight:700;color:rgba(255,255,255,.9);letter-spacing:1px;text-transform:uppercase;}
+.hero h1{font-size:clamp(26px,5vw,44px);font-weight:900;color:#fff;line-height:1.15;margin-bottom:.6rem;}
+.hero h1 span{background:linear-gradient(90deg,#f59e0b,#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{color:rgba(255,255,255,.6);font-size:14px;font-weight:400;}
+
+/* ── PROGRESS ── */
+.prog-wrap{background:#1a0533;padding:.8rem 1.5rem;border-bottom:1px solid rgba(108,43,217,.4);position:sticky;top:0;z-index:100;}
+.prog{display:flex;align-items:center;max-width:880px;margin:0 auto;}
+.pstep{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.25);flex-shrink:0;transition:color .3s;}
+.pstep.active{color:var(--AC);}
+.pstep.done{color:rgba(255,255,255,.5);}
+.pnum{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;}
+.pstep.active .pnum{background:var(--AC);color:#1a0533;border-color:var(--AC);}
+.pstep.done .pnum{background:rgba(255,255,255,.1);}
+.pline{flex:1;height:1px;background:rgba(255,255,255,.1);margin:0 5px;transition:background .3s;}
+.pline.done{background:rgba(255,255,255,.35);}
+.plabel{display:none;}
+@media(min-width:480px){.plabel{display:inline;}}
+
+/* ── WRAP ── */
+.wrap{max-width:880px;margin:0 auto;padding:2rem 1.25rem 5rem;}
+
+/* ── STEP BLOCKS ── */
+.step-block{display:none;animation:fi .25s ease;}
+.step-block.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+/* ── SECTION LABEL ── */
+.slabel{font-size:10.5px;font-weight:800;color:var(--P);text-transform:uppercase;letter-spacing:1px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+.slabel::after{content:'';flex:1;height:1px;background:var(--bd);}
+
+/* ── TIP ── */
+.tip{background:var(--ACL);border:1.5px solid var(--AC);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:1.5rem;font-size:13px;color:#92400e;display:flex;gap:10px;align-items:flex-start;}
+
+/* ── CATEGORY GRID ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;margin-bottom:1.5rem;}
+.ccard{background:var(--w);border:2px solid var(--bd);border-radius:16px;padding:.9rem .85rem;cursor:pointer;transition:all .2s;text-align:center;position:relative;user-select:none;}
+.ccard:hover{border-color:var(--P);transform:translateY(-3px);box-shadow:0 8px 24px rgba(108,43,217,.12);}
+.ccard.sel{border-color:var(--P);background:var(--PL);}
+.ccard.sel::after{content:'✓';position:absolute;top:7px;right:10px;font-size:12px;font-weight:800;color:var(--P);}
+.cc-ico{font-size:28px;margin-bottom:.35rem;}
+.cc-name{font-size:12.5px;font-weight:800;color:var(--tx);}
+.cc-sub{font-size:11px;color:var(--mu);margin-top:3px;line-height:1.35;}
+
+/* ── STYLE GRID ── */
+.sty-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px;margin-bottom:1.5rem;}
+.stycard{background:var(--w);border:2px solid var(--bd);border-radius:16px;padding:.9rem;cursor:pointer;transition:all .2s;position:relative;user-select:none;}
+.stycard:hover{border-color:var(--P);transform:translateY(-3px);box-shadow:0 8px 24px rgba(108,43,217,.12);}
+.stycard.sel{border-color:var(--P);background:var(--PL);}
+.stycard.sel::after{content:'✓';position:absolute;top:8px;right:10px;font-size:12px;font-weight:800;color:var(--P);}
+
+/* ── STYLE PREVIEW BADGE ── */
+.sty-preview{height:56px;border-radius:10px;margin-bottom:.6rem;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;letter-spacing:.5px;overflow:hidden;position:relative;}
+.prev-pf{background:linear-gradient(135deg,#7c4a0a,#d4781a);color:#fde8b0;}
+.prev-cp{background:linear-gradient(135deg,#1a1a00,#f5a800);color:#fff700;}
+.prev-cu{background:linear-gradient(135deg,#ffe8f0,#d4eeff);color:#c44569;}
+.prev-rh{background:linear-gradient(135deg,#2c1a0a,#6b3a1f);color:#e8c88a;}
+.prev-us{background:linear-gradient(135deg,#0d0d0d,#2a2a2a);color:#e0e0e0;}
+.prev-dl{background:linear-gradient(135deg,#000,#1a1a1a);color:#d4af37;}
+.prev-df{background:linear-gradient(135deg,#0d0000,#3d0000);color:#ff6b2b;}
+.prev-me{background:linear-gradient(135deg,#0f0f14,#1c1c2e);color:#ddd5c0;font-style:normal;letter-spacing:2px;}
+
+.sc-name{font-size:13px;font-weight:800;color:var(--tx);margin-bottom:3px;}
+.sc-desc{font-size:11px;color:var(--mu);line-height:1.4;}
+.sc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:.45rem;}
+.stag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--gray);color:var(--mu);}
+
+/* ── SUM BAR ── */
+.sum-bar{background:linear-gradient(135deg,#1a0533,#3d1278);border-radius:14px;padding:.85rem 1.1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sum-label{font-size:12px;color:rgba(255,255,255,.55);font-weight:600;}
+.sum-pill{font-size:12px;font-weight:700;background:rgba(245,158,11,.2);color:#fcd34d;padding:3px 11px;border-radius:20px;}
+
+/* ── FORM ── */
+.fbox{background:var(--w);border-radius:18px;border:1px solid var(--bd);padding:1.75rem;box-shadow:0 4px 20px rgba(108,43,217,.06);}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:540px){.fgrid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field.full{grid-column:1/-1;}
+label{font-size:11.5px;font-weight:700;color:var(--P);}
+label .opt{font-weight:500;color:var(--mu);font-size:11px;}
+input[type=text],select,textarea{
+  font-family:'Poppins',sans-serif;font-size:13.5px;padding:11px 13px;
+  border:1.5px solid var(--bd);border-radius:10px;background:var(--bg);
+  color:var(--tx);outline:none;width:100%;transition:border .2s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--P);background:var(--w);}
+textarea{resize:vertical;min-height:70px;}
+.ratio-row{display:flex;gap:7px;flex-wrap:wrap;}
+.rbtn{
+  padding:8px 14px;font-size:12px;font-weight:700;border:1.5px solid var(--bd);
+  border-radius:9px;cursor:pointer;background:var(--bg);color:var(--mu);
+  font-family:'Poppins',sans-serif;transition:all .2s;
+}
+.rbtn:hover,.rbtn.on{background:var(--P);color:#fff;border-color:var(--P);}
+
+/* ── BUTTONS ── */
+.genbtn{
+  width:100%;background:linear-gradient(135deg,var(--P),var(--PM));color:#fff;
+  border:none;border-radius:12px;padding:16px;font-size:15px;font-weight:800;
+  font-family:'Poppins',sans-serif;cursor:pointer;transition:all .2s;margin-top:1.5rem;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(108,43,217,.35);
+}
+.genbtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,43,217,.45);}
+
+.nav-btns{display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap;}
+.nbtn{
+  flex:1;min-width:120px;padding:12px;border-radius:11px;font-size:13px;
+  font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all .2s;
+}
+.nbtn.next{background:var(--P);color:#fff;border:none;box-shadow:0 4px 12px rgba(108,43,217,.3);}
+.nbtn.next:hover{background:var(--PD);}
+.nbtn.back{background:transparent;border:1.5px solid var(--bd);color:var(--mu);}
+.nbtn.back:hover{border-color:var(--P);color:var(--P);}
+.nbtn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── OUTPUT ── */
+.outbox{background:var(--w);border-radius:18px;border:2px solid var(--P);padding:1.75rem;box-shadow:0 4px 20px rgba(108,43,217,.1);}
+.out-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;}
+.out-hd h3{font-size:14px;font-weight:800;color:var(--P);}
+.out-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.copyall{
+  background:var(--P);color:#fff;border:none;padding:8px 15px;border-radius:9px;
+  font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;
+  display:flex;align-items:center;gap:5px;transition:all .2s;
+}
+.copyall:hover{background:var(--PD);}
+.regenbtn{
+  background:var(--gray);color:var(--P);border:1.5px solid var(--bd);padding:8px 15px;
+  border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:'Poppins',sans-serif;display:flex;align-items:center;gap:5px;transition:all .2s;
+}
+.regenbtn:hover{background:var(--PL);border-color:var(--P);}
+
+.pout{
+  font-size:12.5px;line-height:1.9;color:#333;background:#faf9ff;
+  border:1px solid var(--bd);border-radius:12px;padding:1.1rem;
+  white-space:pre-wrap;word-break:break-word;
+}
+.otip{margin-top:.85rem;font-size:12px;color:var(--mu);background:var(--gray);border-radius:9px;padding:.65rem 1rem;line-height:1.6;}
+.otip strong{color:var(--P);}
+
+/* platform hints */
+.platform-hints{display:flex;gap:8px;flex-wrap:wrap;margin-top:.75rem;}
+.phint{font-size:11px;font-weight:600;background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:5px 10px;color:var(--mu);}
+.phint strong{color:var(--tx);}
+
+.spin-wrap{text-align:center;padding:2.5rem;color:var(--mu);font-size:14px;}
+.spin{display:inline-block;width:20px;height:20px;border:2px solid var(--bd);border-top-color:var(--P);border-radius:50%;animation:sp .7s linear infinite;margin-right:8px;vertical-align:middle;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--P);color:#fff;padding:11px 22px;border-radius:12px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;pointer-events:none;z-index:9999;box-shadow:0 4px 20px rgba(108,43,217,.4);}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+
+footer{text-align:center;padding:2.5rem 1rem;color:var(--mu);font-size:12px;}
+footer span{color:var(--P);font-weight:700;}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="app-name">
+      <span class="app-dot">🎨</span>
+      <span class="app-label">Buatin.Poster</span>
+    </div>
+    <h1>Generate Prompt Poster<br><span>Tinggal Isi, Langsung Jadi</span></h1>
+    <p>Pilih kategori &rarr; gaya visual &rarr; isi detail &rarr; prompt AI siap pakai</p>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="prog-wrap">
+  <div class="prog">
+    <div class="pstep active" id="ps1"><div class="pnum">1</div><span class="plabel">Kategori</span></div>
+    <div class="pline" id="pl1"></div>
+    <div class="pstep" id="ps2"><div class="pnum">2</div><span class="plabel">Gaya Visual</span></div>
+    <div class="pline" id="pl2"></div>
+    <div class="pstep" id="ps3"><div class="pnum">3</div><span class="plabel">Detail</span></div>
+    <div class="pline" id="pl3"></div>
+    <div class="pstep" id="ps4"><div class="pnum">4</div><span class="plabel">Hasil</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ══ STEP 1: KATEGORI ══ -->
+<div class="step-block active" id="blk1">
+  <div class="slabel">Langkah 1 &mdash; Pilih Kategori Produk</div>
+  <div class="tip"><span style="font-size:18px;flex-shrink:0">💡</span><span>Pilih kategori yang paling sesuai dengan produk atau bisnismu. Ini membantu prompt yang dihasilkan lebih relevan secara visual.</span></div>
+  <div class="cat-grid">
+    <div class="ccard" onclick="pickCat(this,'food')"><div class="cc-ico">🍔</div><div class="cc-name">Makanan &amp; Minuman</div><div class="cc-sub">Kuliner, minuman, katering</div></div>
+    <div class="ccard" onclick="pickCat(this,'fashion')"><div class="cc-ico">👗</div><div class="cc-name">Fashion &amp; Apparel</div><div class="cc-sub">Baju, sepatu, aksesori</div></div>
+    <div class="ccard" onclick="pickCat(this,'beauty')"><div class="cc-ico">✨</div><div class="cc-name">Skincare &amp; Beauty</div><div class="cc-sub">Kosmetik, perawatan kulit</div></div>
+    <div class="ccard" onclick="pickCat(this,'retail')"><div class="cc-ico">🛍️</div><div class="cc-name">Produk &amp; Retail</div><div class="cc-sub">Barang fisik, toko, UMKM</div></div>
+    <div class="ccard" onclick="pickCat(this,'digital')"><div class="cc-ico">💻</div><div class="cc-name">Produk Digital</div><div class="cc-sub">Course, ebook, software, app</div></div>
+    <div class="ccard" onclick="pickCat(this,'event')"><div class="cc-ico">📅</div><div class="cc-name">Event &amp; Promo</div><div class="cc-sub">Grand opening, launching, flash sale</div></div>
+    <div class="ccard" onclick="pickCat(this,'brand')"><div class="cc-ico">🏢</div><div class="cc-name">Brand &amp; Bisnis</div><div class="cc-sub">Profil brand, company, portofolio</div></div>
+    <div class="ccard" onclick="pickCat(this,'promo')"><div class="cc-ico">🎯</div><div class="cc-name">Promosi Umum</div><div class="cc-sub">Diskon harian, testimonial, story</div></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nbtn next" id="btn1next" onclick="goTo(2)" disabled>Lanjut &rarr; Pilih Gaya Visual</button>
+  </div>
+</div>
+
+<!-- ══ STEP 2: GAYA VISUAL ══ -->
+<div class="step-block" id="blk2">
+  <div class="sum-bar" id="sum2"></div>
+  <div class="slabel">Langkah 2 &mdash; Pilih Gaya Visual Poster</div>
+  <div class="tip"><span style="font-size:18px;flex-shrink:0">🎨</span><span>Pilih gaya visual yang cocok dengan produk dan feel brand kamu. Preview di setiap kartu menunjukkan nuansa warna dan tipografi gaya tersebut.</span></div>
+  <div class="sty-grid">
+
+    <div class="stycard" onclick="pickSty(this,'playful_food')">
+      <div class="sty-preview prev-pf">🍞 3D COOKIE</div>
+      <div class="sc-name">Playful Food</div>
+      <div class="sc-desc">Font 3D dari bahan makanan, warna hangat, karakter imut.</div>
+      <div class="sc-tags"><span class="stag">3D Font</span><span class="stag">Warm</span><span class="stag">Mascot</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'comic_pop')">
+      <div class="sty-preview prev-cp">💥 COMIC BOLD</div>
+      <div class="sc-name">Comic Pop Art</div>
+      <div class="sc-desc">Ledakan halftone, bold kuning-hitam, energi komik manga.</div>
+      <div class="sc-tags"><span class="stag">Halftone</span><span class="stag">Bold</span><span class="stag">Pop</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'cute_pastel')">
+      <div class="sty-preview prev-cu">🌸 Bubbly Pastel</div>
+      <div class="sc-name">Cute Pastel</div>
+      <div class="sc-desc">Font 3D bubbly warna-warni pastel, ceria dan playful.</div>
+      <div class="sc-tags"><span class="stag">Pastel</span><span class="stag">Bubbly</span><span class="stag">Soft</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'retro_heritage')">
+      <div class="sty-preview prev-rh">🏺 VINTAGE CO.</div>
+      <div class="sc-name">Retro Heritage</div>
+      <div class="sc-desc">Font rustic vintage, earthy brown, feel artisan premium.</div>
+      <div class="sc-tags"><span class="stag">Vintage</span><span class="stag">Rustic</span><span class="stag">Premium</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'urban_sketchy')">
+      <div class="sty-preview prev-us">🖊️ CHALK SKETCH</div>
+      <div class="sc-name">Urban Sketchy</div>
+      <div class="sc-desc">Chalk doodle di latar gelap, hand-drawn, street credibility.</div>
+      <div class="sc-tags"><span class="stag">Chalk</span><span class="stag">Dark</span><span class="stag">Urban</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'dark_luxury')">
+      <div class="sty-preview prev-dl">🥃 GOLD LUXURY</div>
+      <div class="sc-name">Dark Luxury</div>
+      <div class="sc-desc">Hitam + cipratan emas, grunge eksklusif, high-end premium.</div>
+      <div class="sc-tags"><span class="stag">Black+Gold</span><span class="stag">Grunge</span><span class="stag">Exclusive</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'dark_fire')">
+      <div class="sty-preview prev-df">🔥 FIRE EPIC</div>
+      <div class="sc-name">Dark Fire Dramatic</div>
+      <div class="sc-desc">Api nyata, asap, font metalik, sinematik dan epic.</div>
+      <div class="sc-tags"><span class="stag">Fire</span><span class="stag">Metallic</span><span class="stag">Epic</span></div>
+    </div>
+
+    <div class="stycard" onclick="pickSty(this,'modern_elegant')">
+      <div class="sty-preview prev-me">◆ MODERN ÉLITE</div>
+      <div class="sc-name">Modern Elegant</div>
+      <div class="sc-desc">Whitespace lega, tipografi sleek bold, sentuhan glassy, palette gelap netral + satu aksen.</div>
+      <div class="sc-tags"><span class="stag">Luxury</span><span class="stag">Minimal</span><span class="stag">Editorial</span></div>
+    </div>
+
+  </div>
+  <div class="nav-btns">
+    <button class="nbtn back" onclick="goTo(1)">&larr; Kembali</button>
+    <button class="nbtn next" id="btn2next" onclick="goTo(3)" disabled>Lanjut &rarr; Isi Detail Produk</button>
+  </div>
+</div>
+
+<!-- ══ STEP 3: FORM ══ -->
+<div class="step-block" id="blk3">
+  <div class="sum-bar" id="sum3"></div>
+  <div class="slabel">Langkah 3 &mdash; Detail Produk</div>
+  <div class="fbox">
+    <div class="fgrid">
+
+      <div class="field full">
+        <label>Nama Produk / Brand <span style="color:var(--re)">*</span></label>
+        <input type="text" id="fb" placeholder="cth: Kopi Kenangan Blend / Nike Air Max / Skillacademy Pro">
+      </div>
+
+      <div class="field full">
+        <label>Tagline / Teks Pendukung <span style="color:var(--re)">*</span></label>
+        <input type="text" id="ft" placeholder="cth: Nikmatnya Nggak Ketulungan / Just Do It / Level Up Your Skills">
+      </div>
+
+      <div class="field full">
+        <label>Rasio Gambar <span style="color:var(--re)">*</span></label>
+        <div class="ratio-row">
+          <button class="rbtn on" onclick="setR(this,'9:16 (Portrait Story)')">9:16 Story</button>
+          <button class="rbtn" onclick="setR(this,'1:1 (Square Feed)')">1:1 Feed</button>
+          <button class="rbtn" onclick="setR(this,'4:5 (Portrait Feed)')">4:5 Feed</button>
+          <button class="rbtn" onclick="setR(this,'16:9 (Landscape Banner)')">16:9 Banner</button>
+          <button class="rbtn" onclick="setR(this,'4:3 (Landscape)')">4:3</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Harga Produk <span class="opt">(opsional)</span></label>
+        <input type="text" id="fp" placeholder="cth: Rp 45.000 / $19.99">
+      </div>
+
+      <div class="field">
+        <label>Harga Diskon / Coret <span class="opt">(opsional)</span></label>
+        <input type="text" id="fd" placeholder="cth: dari Rp 99.000 jadi Rp 45.000">
+      </div>
+
+      <div class="field full">
+        <label>Varian / Pilihan Produk <span class="opt">(opsional)</span></label>
+        <input type="text" id="fv" placeholder="cth: Vanilla, Caramel, Hazelnut / S, M, L, XL / Basic, Pro, Enterprise">
+      </div>
+
+      <div class="field">
+        <label>Target Audiens <span class="opt">(opsional — mempengaruhi gaya visual)</span></label>
+        <select id="fa">
+          <option value="">— Pilih —</option>
+          <option>Pria usia 18-35 (urban, aktif)</option>
+          <option>Wanita usia 20-40 (ibu rumah tangga)</option>
+          <option>Remaja 15-25 (gen-z, trendy)</option>
+          <option>Profesional / pekerja kantoran</option>
+          <option>Pengusaha / B2B</option>
+          <option>Semua kalangan</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Tema Warna <span class="opt">(opsional)</span></label>
+        <input type="text" id="fc" placeholder="cth: biru tua + emas / merah + putih / pastel pink">
+      </div>
+
+      <div class="field full">
+        <label>Info Tambahan <span class="opt">(opsional)</span></label>
+        <textarea id="fe" placeholder="cth: tampilkan logo brand di pojok kanan atas, tersedia di Shopee & Tokopedia, ukuran 250ml, akun IG @namabrand, sertifikasi BPOM"></textarea>
+      </div>
+
+    </div>
+    <button class="genbtn" onclick="doGen()">✨ Generate Prompt AI</button>
+  </div>
+  <div class="nav-btns"><button class="nbtn back" onclick="goTo(2)">&larr; Kembali</button></div>
+</div>
+
+<!-- ══ STEP 4: OUTPUT ══ -->
+<div class="step-block" id="blk4">
+  <div class="sum-bar" id="sum4"></div>
+
+  <div id="loadDiv" class="spin-wrap" style="display:none">
+    <span class="spin"></span>Sedang meracik prompt terbaik...
+  </div>
+
+  <div class="outbox" id="outbox" style="display:none">
+    <div class="out-hd">
+      <h3 id="outtitle">Prompt Siap Pakai</h3>
+      <div class="out-actions">
+        <button class="regenbtn" onclick="doRegen()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+          Variasi Baru
+        </button>
+        <button class="copyall" onclick="doCopy()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Salin Prompt
+        </button>
+      </div>
+    </div>
+    <div class="pout" id="pout"></div>
+    <div class="otip">Salin prompt lalu paste ke AI image tool pilihanmu.</div>
+    <div class="platform-hints">
+      <div class="phint"><strong>Midjourney</strong> — tambahkan <code>--ar 9:16</code> (atau rasio yg dipilih) di akhir</div>
+      <div class="phint"><strong>DALL-E / ChatGPT</strong> — paste langsung, siap pakai</div>
+      <div class="phint"><strong>Canva AI</strong> — paste di kolom "describe your image"</div>
+      <div class="phint"><strong>Stable Diffusion</strong> — gunakan sebagai positive prompt</div>
+    </div>
+  </div>
+
+  <div class="nav-btns" style="margin-top:1.25rem">
+    <button class="nbtn back" onclick="goTo(3)">&larr; Edit Detail</button>
+    <button class="nbtn next" onclick="doReset()">+ Buat Poster Baru</button>
+  </div>
+</div>
+
+</div><!-- end wrap -->
+
+<footer>Made with ☕ &mdash; <span>Buatin.Poster</span> AI Prompt Generator</footer>
+<div class="toast" id="toast">✓ Prompt berhasil disalin!</div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+var ST={cat:null,sty:null,ratio:'9:16 (Portrait Story)'};
+var curStep=1;
+var lastData=null;
+
+// ── CATEGORY DATA ────────────────────────────────────────────────────────────
+var CATS={
+  food:   {name:'Makanan & Minuman',ico:'🍔'},
+  fashion:{name:'Fashion & Apparel',ico:'👗'},
+  beauty: {name:'Skincare & Beauty',ico:'✨'},
+  retail: {name:'Produk & Retail',ico:'🛍️'},
+  digital:{name:'Produk Digital',ico:'💻'},
+  event:  {name:'Event & Promo',ico:'📅'},
+  brand:  {name:'Brand & Bisnis',ico:'🏢'},
+  promo:  {name:'Promosi Umum',ico:'🎯'}
+};
+
+// ── RANDOMISATION POOLS ──────────────────────────────────────────────────────
+var RND={
+  pick:function(a){return a[Math.floor(Math.random()*a.length)];},
+
+  audTone:{
+    'Pria usia 18-35 (urban, aktif)':{
+      lighting:'dramatic side-lighting with sharp contrast',
+      typo:'bold condensed sans-serif with strong weight',
+      prop:'sleek minimal props, matte dark surface, urban feel',
+      accent:'strong geometric and metallic accents'
+    },
+    'Wanita usia 20-40 (ibu rumah tangga)':{
+      lighting:'soft warm diffused window lighting',
+      typo:'friendly rounded serif or script-adjacent sans',
+      prop:'home lifestyle props, warm fabric textures, kitchen or living room feel',
+      accent:'soft floral or organic curved accents'
+    },
+    'Remaja 15-25 (gen-z, trendy)':{
+      lighting:'vivid high-saturation neon-adjacent lighting',
+      typo:'playful chunky display font with personality',
+      prop:'trendy lifestyle props, streetwear energy, bold background elements',
+      accent:'bright pop, neon, or gradient accent details'
+    },
+    'Profesional / pekerja kantoran':{
+      lighting:'clean neutral studio lighting, polished',
+      typo:'clean modern sans-serif, confident weight',
+      prop:'desk, laptop, or minimal workspace props',
+      accent:'corporate-clean accents, navy or deep tone highlights'
+    },
+    'Pengusaha / B2B':{
+      lighting:'premium clean studio lighting, luxury feel',
+      typo:'authoritative condensed serif or refined sans',
+      prop:'minimal luxury props, marble or brushed metal surface',
+      accent:'gold foil or subtle prestige accent details'
+    },
+    'Semua kalangan':{
+      lighting:'balanced natural warm lighting',
+      typo:'versatile approachable bold sans',
+      prop:'universal relatable lifestyle props',
+      accent:'warm neutral balanced palette accents'
+    }
+  },
+  defTone:{
+    lighting:'natural warm overhead lighting',
+    typo:'bold clean sans-serif',
+    prop:'simple product-complementing props',
+    accent:'warm neutral accent details'
+  },
+
+  bg:{
+    playful_food:[
+      'warm oak wood table with soft kitchen bokeh background',
+      'rustic marble counter with warm afternoon window light',
+      'dark espresso wood surface with warm cafe bokeh',
+      'light rattan placemat on bamboo table with tropical foliage bokeh',
+      'white ceramic tile surface with herbs scattered and soft natural light'
+    ],
+    comic_pop:[
+      'bold yellow with black radiating speed lines and halftone dots',
+      'vivid orange with dynamic radial burst lines from center',
+      'bright tan/cream with scattered pop-art halftone pattern',
+      'warm amber with concentric circle lines and halftone overlay',
+      'hot yellow-green with comic panel diagonal speed lines'
+    ],
+    cute_pastel:[
+      'soft mint gradient background with gentle bokeh leaves',
+      'pale lavender with frosted glass light diffusion effect',
+      'creamy ivory with subtle watercolor wash and soft florals',
+      'sky blue pastel with soft bokeh flower elements',
+      'blush pink gradient with scattered soft cloud elements'
+    ],
+    retro_heritage:[
+      'dark walnut wood grain with aged kraft paper texture overlay',
+      'worn leather surface with vintage parchment paper border',
+      'antique stone counter with rustic linen cloth texture',
+      'deep mahogany surface with aged parchment background',
+      'burnt sienna wooden plank surface with worn edges'
+    ],
+    urban_sketchy:[
+      'deep charcoal blackboard with chalk dust texture',
+      'near-black slate with fine grain chalk texture',
+      'dark gunmetal surface with subtle concrete grain',
+      'pitch black with faint crosshatch chalk pattern overlay',
+      'very dark navy with rough chalk-smear texture'
+    ],
+    dark_luxury:[
+      'pure black with dramatic gold paint drip splatter at corners',
+      'near-black with heavy gold ink brushstroke in upper right',
+      'midnight black with scattered gold foil dust particles',
+      'deep black with gold spray-paint texture along edges',
+      'obsidian black with subtle gold shimmer gradient at base'
+    ],
+    dark_fire:[
+      'pitch black with billowing orange-red fire rising from bottom',
+      'dark grey with fiery embers glowing from lower corners',
+      'near-black with low-burning flame ring encircling product',
+      'charcoal black with dramatic curved fire arc behind product',
+      'deep black with dual fire columns left and right'
+    ],
+    modern_elegant:[
+      'deep charcoal (#0f0f14) background with vast negative space and a single razor-thin horizontal gold line dividing upper and lower thirds',
+      'near-black navy (#0d0d1a) background with a subtle frosted glass panel floating behind the product',
+      'off-black (#111118) background with a very faint large-circle geometric outline as the only background element',
+      'dark slate (#13131f) background with a soft vignette and a barely-visible diagonal grid texture',
+      'deep charcoal with a muted warm-grey gradient from bottom-left, maximum negative space'
+    ]
+  },
+
+  mascot:{
+    playful_food:[
+      'a tiny winking chef character in bottom-right corner',
+      'a cute bouncing ingredient character giving thumbs up',
+      'a small animated food mascot character smiling broadly',
+      'a chibi food character with tiny arms and expressive eyes'
+    ]
+  },
+
+  lighting:{
+    playful_food:[
+      'warm overhead lamp light with soft fill shadow and golden tones',
+      'golden-hour window light with warm bokeh glow',
+      'soft ring-light effect casting warm even tones',
+      'dramatic top-spot light with warm amber fill'
+    ],
+    comic_pop:[
+      'flat hard graphic light with strong black outline shadow',
+      'pop-art style bold flat lighting, no gradients',
+      'stark uniform light with thick drop shadow',
+      'bright overexposed light with bold graphic shadow'
+    ],
+    cute_pastel:[
+      'soft diffused studio light with pastel colour bleed',
+      'gentle airy natural light with rainbow prism scatter',
+      'soft ring-light with pastel colour bleed',
+      'bright airy window light with dreamy soft fill'
+    ],
+    retro_heritage:[
+      'warm candle-style side light with long deep shadow',
+      'dramatic low-key warm Rembrandt side light',
+      'golden lantern-style warm fill with moody shadow',
+      'soft morning window light with warm amber shadow'
+    ],
+    urban_sketchy:[
+      'hard single-source side-light with chalk highlight on product',
+      'dramatic overhead spotlight with dark fill',
+      'cool-toned studio light with sharp chalk-white highlights',
+      'moody single-source light from above with strong shadow'
+    ],
+    dark_luxury:[
+      'dramatic high-contrast studio spot light with hard shadow',
+      'cinematic neon-edge rim light tracing product silhouette',
+      'sharp key light with near-black fill shadow',
+      'theatrical spotlight with subtle lens flare at edge'
+    ],
+    dark_fire:[
+      'backlit fiery glow with strong amber rim light',
+      'dramatic under-light from flames casting upward shadows',
+      'high-contrast back fire glow plus cool ambient fill',
+      'cinematic lens flare from fire source at left'
+    ],
+    modern_elegant:[
+      'clean precision studio lighting — single soft box from upper-left, minimal fill, razor-sharp product shadow',
+      'elegant rim lighting tracing the product silhouette against near-black, no hard shadows',
+      'refined diffused top light with a subtle warm-cool split creating gentle product depth',
+      'high-key minimal studio light, almost shadowless, product appears to float on the surface'
+    ]
+  },
+
+  productPos:[
+    'positioned center-left with generous negative space on the right for text',
+    'placed center-right with headline text anchored to the left',
+    'dead center commanding the frame with design elements surrounding it',
+    'slightly off-center to the right on a dynamic diagonal composition',
+    'large and dominant in lower two-thirds with headline text above'
+  ],
+
+  decorEl:{
+    playful_food:[
+      'scattered ingredient crumbs and tiny food particles',
+      'small fresh herb sprigs and leaf elements',
+      'tiny golden heart shapes and sparkle flecks',
+      'delicate golden sparkle flecks and dot confetti'
+    ],
+    comic_pop:[
+      'motion lines radiating outward from product',
+      'small starburst shapes and impact marks',
+      'action speed dots and comic motion trails',
+      'small action word bubble shapes in background'
+    ],
+    cute_pastel:[
+      'floating mini hearts and star confetti',
+      'small pastel star shapes and cloud puffs',
+      'soft bubble elements and tiny bow shapes',
+      'tiny sparkle stars and crescent moon accents'
+    ],
+    retro_heritage:[
+      'vintage botanical leaf ornaments',
+      'small aged botanical sketch illustrations',
+      'corner flourish ornaments in aged gold',
+      'distressed dot and line border details'
+    ],
+    urban_sketchy:[
+      'chalk arrow doodles pointing to product',
+      'hand-drawn rough circle underlines on key text',
+      'asterisk chalk marks and rough bracket highlights',
+      'small hand-sketched icon illustrations'
+    ],
+    dark_luxury:[
+      'fine gold dust particles suspended in air',
+      'subtle hexagonal gold foil geometric shapes',
+      'tiny crown icons and diamond separator marks',
+      'elegant thin gold line frame elements'
+    ],
+    dark_fire:[
+      'floating amber ember sparks rising upward',
+      'wispy white smoke trail elements',
+      'small fire lick accents at product base',
+      'subtle heat shimmer distortion effect'
+    ],
+    modern_elegant:[
+      'a single ultra-thin rectangular frame outline as the only decorative element',
+      'one delicate horizontal rule line below the headline and nothing else',
+      'a barely-visible large circle outline behind the product, partial crop at edge',
+      'minimal scattered dot grid pattern at far corner, very low opacity'
+    ]
+  },
+
+  badgePrice:[
+    'bold circular stamp badge with drop shadow',
+    'crinkled price tag shape with hole and string',
+    'hexagonal bold price badge',
+    'starburst explosion price badge',
+    'rounded pill with subtle drop shadow',
+    'torn-edge label sticker'
+  ],
+  badgeDiscount:[
+    'bold diagonal ribbon banner',
+    'speech bubble callout with tail',
+    'bold sticker shape with drop shadow',
+    'curved flag ribbon at corner',
+    'jagged burst sticker shape'
+  ]
+};
+
+function rnd(key,style){
+  var pool=RND[key][style]||[];
+  return pool.length?RND.pick(pool):'';
+}
+
+// ── STYLE DEFINITIONS ────────────────────────────────────────────────────────
+var STYS={
+  playful_food:   {name:'Playful Food',    ico:'🍞'},
+  comic_pop:      {name:'Comic Pop Art',   ico:'💥'},
+  cute_pastel:    {name:'Cute Pastel',     ico:'🌸'},
+  retro_heritage: {name:'Retro Heritage',  ico:'🏺'},
+  urban_sketchy:  {name:'Urban Sketchy',   ico:'🖊️'},
+  dark_luxury:    {name:'Dark Luxury',     ico:'🥃'},
+  dark_fire:      {name:'Dark Fire',       ico:'🔥'},
+  modern_elegant: {name:'Modern Elegant',  ico:'◆'}
+};
+
+var STYLE_MOODS={
+  playful_food:   'Warm, appetizing, homey, joyful',
+  comic_pop:      'Explosive energy, fun, bold, action-packed',
+  cute_pastel:    'Fresh, cheerful, youthful, light',
+  retro_heritage: 'Nostalgic, trustworthy, handcrafted, quality',
+  urban_sketchy:  'Confident, clean, credible, street energy',
+  dark_luxury:    'Powerful, exclusive, high-value, cinematic',
+  dark_fire:      'Epic, intense, dramatic, cinematic',
+  modern_elegant: 'Refined, aspirational, editorial, premium'
+};
+
+function buildPrompt(d){
+  var sk = ST.sty;
+  var sn = STYS[sk].name;
+
+  // resolve audience tone (shapes prompt, never printed verbatim)
+  var tone = d.aud ? (RND.audTone[d.aud]||RND.defTone) : RND.defTone;
+
+  // random variation picks
+  var bg       = rnd('bg', sk);
+  var light    = rnd('lighting', sk) || tone.lighting;
+  var decor    = rnd('decorEl', sk);
+  var prodPos  = RND.pick(RND.productPos);
+  var pbadge   = RND.pick(RND.badgePrice);
+  var dbadge   = RND.pick(RND.badgeDiscount);
+
+  // category-informed prop hint (subtle, not printed as label)
+  var catProps={
+    food:    'food-related props (ingredients, bowls, utensils)',
+    fashion: 'fashion props (folded fabric, hanger, accessories)',
+    beauty:  'beauty props (dropper bottles, petals, clean surface)',
+    retail:  'retail product props (shopping bag, clean shelf)',
+    digital: 'digital-feel props (laptop, phone mockup, clean desk)',
+    event:   'event props (confetti, spotlight, stage feel)',
+    brand:   'brand identity props (business cards, minimal desk)',
+    promo:   'promotional props (sale tag, star burst, attention elements)'
+  };
+  var catProp = catProps[ST.cat]||tone.prop;
+
+  // style-specific visual core
+  var cores={
+    'Playful Food':
+      '- Giant 3D headline typography shaped like actual food (textured letter forms inspired by '+catProp+') in warm golden-brown tones with highlight and shadow depth\n'+
+      '- Background: '+bg+'\n'+
+      '- Mascot: '+rnd('mascot','playful_food')+'\n'+
+      '- Product '+prodPos+', lit with '+light+'\n'+
+      '- Props: '+catProp+' scattered naturally around the composition\n'+
+      '- Decorative accents: '+decor+'\n'+
+      '- Typography: '+tone.typo+' for supporting text',
+
+    'Comic Pop Art':
+      '- Massive headline in thick outlined comic-book font, bold uppercase, 5-10 degree diagonal tilt for kinetic energy\n'+
+      '- Background: '+bg+'\n'+
+      '- Product '+prodPos+' with sharp drop shadow, lit with '+light+'\n'+
+      '- Props: '+catProp+' as bold graphic supporting elements\n'+
+      '- Decorative accents: '+decor+'\n'+
+      '- Typography: '+tone.typo+' with thick black outline',
+
+    'Cute Pastel':
+      '- Large 3D bubbly letterforms headline, each letter a different soft pastel color (mint, blush pink, lavender, sky blue, butter yellow) with white outline\n'+
+      '- Background: '+bg+'\n'+
+      '- Product '+prodPos+', lit with '+light+'\n'+
+      '- Props: '+catProp+' styled in a soft, playful arrangement\n'+
+      '- Decorative accents: '+decor+' floating around playfully\n'+
+      '- Typography: '+tone.typo+' — rounded and friendly',
+
+    'Retro Heritage':
+      '- Large vintage headline with distressed slab-serif font, worn texture, warm ivory or aged tan color\n'+
+      '- Background: '+bg+'\n'+
+      '- Product '+prodPos+', lit with '+light+'\n'+
+      '- Props: '+catProp+' arranged with an artisan/handcrafted feel\n'+
+      '- Decorative accents: '+decor+'\n'+
+      '- Typography: '+tone.typo+' with distressed vintage texture',
+
+    'Urban Sketchy':
+      '- Headline in bold chalk block lettering, white on dark background, slightly rough edges\n'+
+      '- Background: '+bg+'\n'+
+      '- Product '+prodPos+', lit with '+light+'\n'+
+      '- 3-4 hand-drawn chalk doodle benefit icons with short text labels\n'+
+      '- Props: '+catProp+' rendered as sketch-style supporting elements\n'+
+      '- Decorative accents: '+decor+'\n'+
+      '- Typography: '+tone.typo+' for headline, chalk handwriting style for labels',
+
+    'Dark Luxury':
+      '- Massive bold all-caps headline, white with gold/yellow outline, slight grunge distress\n'+
+      '- Background: '+bg+'\n'+
+      '- Product '+prodPos+', lit with '+light+', subtle reflection on dark surface\n'+
+      '- 3 key feature highlights in gold circular badges or icon row\n'+
+      '- Props: '+catProp+' in a minimal luxury arrangement\n'+
+      '- Decorative accents: '+decor+'\n'+
+      '- Typography: '+tone.typo+' maximum condensed weight',
+
+    'Dark Fire Dramatic':
+      '- Large metallic/steel-look all-caps headline with fiery glow and ember edge effects\n'+
+      '- Background: '+bg+'\n'+
+      '- Product '+prodPos+', lit with '+light+'\n'+
+      '- Tagline in gold/fire-orange brushstroke banner shape beneath headline\n'+
+      '- Props: '+catProp+' in a dramatic cinematic arrangement\n'+
+      '- Decorative accents: '+decor+'\n'+
+      '- Typography: '+tone.typo+' with metallic/engraved texture feel',
+
+    'Modern Elegant':
+      '- Headline in bold-weight sleek modern sans-serif — large, confident, wide tracking, no decorative effects\n'+
+      '- Tagline in a contrasting lighter weight directly beneath — serif or thin sans\n'+
+      '- Background: '+bg+'\n'+
+      '- Product '+prodPos+', lit with '+light+' — product must feel like it is floating with perfect isolation\n'+
+      '- Glassmorphism accent: one frosted-glass semi-transparent panel as a subtle layout layer (10-15% opacity, thin border)\n'+
+      '- Whitespace is a design element — at least 40% of the poster must remain empty\n'+
+      '- Props: '+catProp+' reduced to absolute minimum — one or two elements maximum, barely present\n'+
+      '- Decorative accents: '+decor+' — restraint is key, less is more\n'+
+      '- Typography hierarchy: 3 clear levels — headline (large, bold), tagline (medium, light), detail text (small, mono or thin sans)\n'+
+      '- Color: predominantly dark neutral background, '+( d.col ? d.col : tone.accent+' as the single accent color' )+', and white/off-white text only'
+  };
+
+  var lines=[
+    'Create a '+sn+' style product poster.',
+    '',
+    'Product: '+d.b,
+    'Tagline: "'+d.t+'"',
+    'Canvas ratio: '+d.r,
+    '',
+    'Visual style:',
+    cores[sn]
+  ];
+
+  if(d.p)  lines.push('- Price: display "'+d.p+'" in a '+pbadge);
+  if(d.dc) lines.push('- Discount: show "'+d.dc+'" as '+dbadge);
+  if(d.v)  lines.push('- Variants shown: '+d.v);
+  if(sk !== 'modern_elegant') lines.push(d.col ? '- Color theme: '+d.col : '- Key accent: '+tone.accent);
+  if(d.ex) lines.push('- Additional: '+d.ex);
+
+  lines.push('','Mood: '+STYLE_MOODS[sk]+'.','Output: Single clean poster image, no watermarks, no lorem ipsum text.');
+  return lines.join('\n');
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function goTo(n){
+  if(n===2&&!ST.cat)return;
+  if(n===3&&!ST.sty)return;
+  curStep=n;
+  document.querySelectorAll('.step-block').forEach(function(b,i){b.classList.toggle('active',i===n-1);});
+  updProg(); updSumBars();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updProg(){
+  for(var i=1;i<=4;i++){
+    var el=document.getElementById('ps'+i);
+    el.classList.remove('active','done');
+    if(i===curStep)el.classList.add('active');
+    else if(i<curStep)el.classList.add('done');
+    if(i<4) document.getElementById('pl'+i).classList.toggle('done',i<curStep);
+  }
+}
+
+function updSumBars(){
+  var cn=ST.cat?CATS[ST.cat].ico+' '+CATS[ST.cat].name:'';
+  var sn=ST.sty?STYS[ST.sty].ico+' '+STYS[ST.sty].name:'';
+  ['sum2','sum3','sum4'].forEach(function(id){
+    var el=document.getElementById(id);
+    var h='<span class="sum-label">Pilihan kamu:</span>';
+    if(cn) h+='<span class="sum-pill">'+cn+'</span>';
+    if(sn) h+='<span class="sum-pill">'+sn+'</span>';
+    el.innerHTML=h;
+  });
+}
+
+// ── PICK HANDLERS ────────────────────────────────────────────────────────────
+function pickCat(el,id){
+  document.querySelectorAll('.ccard').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel'); ST.cat=id;
+  document.getElementById('btn1next').disabled=false;
+}
+
+function pickSty(el,id){
+  document.querySelectorAll('.stycard').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel'); ST.sty=id;
+  document.getElementById('btn2next').disabled=false;
+}
+
+function setR(el,val){
+  document.querySelectorAll('.rbtn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on'); ST.ratio=val;
+}
+
+// ── GENERATE ─────────────────────────────────────────────────────────────────
+function doGen(){
+  var b=document.getElementById('fb').value.trim();
+  var t=document.getElementById('ft').value.trim();
+  if(!b||!t){alert('Nama produk dan tagline wajib diisi!');return;}
+
+  lastData={
+    b:b, t:t, r:ST.ratio,
+    p: document.getElementById('fp').value.trim(),
+    dc:document.getElementById('fd').value.trim(),
+    v: document.getElementById('fv').value.trim(),
+    aud:document.getElementById('fa').value,
+    col:document.getElementById('fc').value.trim(),
+    ex:document.getElementById('fe').value.trim()
+  };
+
+  curStep=4;
+  document.querySelectorAll('.step-block').forEach(function(bl,i){bl.classList.toggle('active',i===3);});
+  updProg(); updSumBars();
+  document.getElementById('loadDiv').style.display='block';
+  document.getElementById('outbox').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  setTimeout(function(){
+    var txt=buildPrompt(lastData);
+    document.getElementById('pout').textContent=txt;
+    document.getElementById('outtitle').textContent=STYS[ST.sty].ico+' '+STYS[ST.sty].name+' \u00d7 '+CATS[ST.cat].ico+' '+CATS[ST.cat].name;
+    document.getElementById('loadDiv').style.display='none';
+    document.getElementById('outbox').style.display='block';
+  },700);
+}
+
+function doRegen(){
+  if(!lastData)return;
+  document.getElementById('loadDiv').style.display='block';
+  document.getElementById('outbox').style.display='none';
+  setTimeout(function(){
+    var txt=buildPrompt(lastData);
+    document.getElementById('pout').textContent=txt;
+    document.getElementById('loadDiv').style.display='none';
+    document.getElementById('outbox').style.display='block';
+  },500);
+}
+
+function doCopy(){
+  navigator.clipboard.writeText(document.getElementById('pout').textContent).then(function(){showToast();});
+}
+
+function doReset(){
+  ST={cat:null,sty:null,ratio:'9:16 (Portrait Story)'}; lastData=null; curStep=1;
+  document.querySelectorAll('.step-block').forEach(function(b,i){b.classList.toggle('active',i===0);});
+  document.querySelectorAll('.ccard,.stycard').forEach(function(c){c.classList.remove('sel');});
+  document.getElementById('btn1next').disabled=true;
+  document.getElementById('btn2next').disabled=true;
+  ['fb','ft','fp','fd','fv','fc','fe'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('fa').value='';
+  document.querySelectorAll('.rbtn').forEach(function(b,i){b.classList.remove('on');if(i===0)b.classList.add('on');});
+  updProg(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showToast(){
+  var t=document.getElementById('toast');
+  t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on');},2200);
+}
+</script>
+</body>
+</html>
